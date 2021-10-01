@@ -8,7 +8,7 @@
      *ARRAY $juegosMasVendido,$tickets
      *INT $opcion
      */
-    $juegoMasVendido = precargarJuegosVendidos($juegoMasVendido);
+    $juegoMasVendido = precargarJuegosVendidos();
     $tickets = crearTotalVentas($juegoMasVendido);
     /*print_r permite imprimir la informacion de la estructura de datos, recibe como parametro 
     la expresion,(una variable) que va a ser impresa*/
@@ -48,8 +48,8 @@
 
                     break;
                 case 3:
-
-                    $indice = mostrarPrimerMes($tickets);
+                    $montoIn = validarNumero(" un monto total");
+                    $indice = obtenerPrimerMes($tickets,$montoIn);
                     mostrarInformacion($juegoMasVendido, $tickets, $indice);
                     break;
                 case 4:
@@ -181,12 +181,12 @@
      * @param Array $tickets
      * @return Int 
      */
-    function mostrarPrimerMes($tickets)
+    function obtenerPrimerMes($tickets,$montoIn)
     {
 
         $i = 0;
-
-        $montoIn = validarNumero(" un monto total");
+        
+        
         $encontrado = false;
         while ($i < count($tickets) && !$encontrado) {
             $montoTotal = $tickets[$i];
@@ -263,7 +263,7 @@
      * @param Array $juegoMasVendido
      * @return Array retorna la estructura de datos con los valores cargados 
      */
-    function precargarJuegosVendidos($juegoMasVendido)
+    function precargarJuegosVendidos()
     {
         
         $juegoMasVendido = array();
