@@ -81,7 +81,7 @@
     function mostrarInformacion($juegoMasVendido, $tickets, $indice)
     {
         $mes = mesEnTexto($indice);
-        $venta = $juegoMasVendido[$indice]["precioTicket"] * $juegoMasVendido[$indice]["cantidadTickets"];
+        $venta = ($juegoMasVendido[$indice]["precioTicket"] * $juegoMasVendido[$indice]["cantidadTickets"]);
         echo "----------------------------------------------------------------------\n";
 
         echo "<" . $mes . ">\n El juego con mayor  monto de venta: " . $juegoMasVendido[$indice]["juego"] . " \n";
@@ -127,7 +127,7 @@
      * Permite ingresar una venta de tickets de un juego e  incrementa el monto total del mes ingresado
      * INT $indice, $cantidad
      * STRING $mes
-     * FLOAT $precio
+     * FLOAT $precio,$monto,$montoIn
      * @param Array $tickets
      * @param Array $juegoMasVendido
      * @return void
@@ -141,9 +141,9 @@
         $precio = validarNumero("precio ticket");
         $cantidad = validarNumero("cantidad de tickets");
         $monto = $juegoMasVendido[$mes]["precioTicket"] * $juegoMasVendido[$mes]["cantidadTickets"];
-        //Incrementa el monto total de ventas
-        $tickets[$mes] = $tickets[$mes] + $monto;
         $montoIn=$precio*$cantidad;
+        //Incrementa el monto total de ventas
+        $tickets[$mes] = ($tickets[$mes] + $montoIn);
         /*si la venta ingresada tiene mayor monto de venta que el juego ya existente en ese mes
          se actualiza la estructura juegosMasVendido*/
         if ($montoIn > $monto) {
