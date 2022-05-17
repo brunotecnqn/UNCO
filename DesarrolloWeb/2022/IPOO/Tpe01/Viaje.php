@@ -9,14 +9,19 @@ class Viaje
    private $cant_maxima;
    private $objResponsable;
    private $arre_pasajero = array();
-
-   public function  __construct($codigo_viaje, $destino, $cant_maxima, $colObjpasajeros,$refResponsable)
+   private $esIdaVuelta;
+   private $importe;
+  
+   public function  __construct($codigo_viaje, $destino, $cant_maxima, $colObjpasajeros,$refResponsable,$esIdaVuelta,$importe)
    {
       $this->codigo_viaje = $codigo_viaje;
       $this->destino = $destino;
       $this->cant_maxima = $cant_maxima;
       $this->arre_pasajero = $colObjpasajeros;
       $this->objResponsable=$refResponsable;
+      $this->esIdaVuelta=$esIdaVuelta;
+      $this->importe=$importe;
+       
    }
    public function getCodigo_viaje()
    {
@@ -62,9 +67,23 @@ class Viaje
 
       $this->arre_pasajero = $arre_pas;
    }
-
+   /**
+    * El método retorna el importe del pasaje si se pudo realizar la venta
+    ** @return 
+   */
+  public function venderPasaje($pasajero) 
+{ 
+   $importe="";
+   if($this->hayPasajesDisponible())
+  {
+   $this->agregarPasajero($pasajero);
+   $importe=$this->calcularImporte();
+  } 
+      
+   return $importe;
+}
    
-   public function verificarEspacio()
+   public function hayPasajesDisponible()
    {
       return count($this->getArre_pasajero()) < $this->getCant_maxima();
    }
@@ -94,13 +113,13 @@ class Viaje
     * @param String $apellido
     * @return Boolean
     */
-   public function agregarPasajero($nombre, $apellido, $num_documento,$telefono)
+   public function agregarPasajero($pasajero)
    {
       $res = false;
-      $nuevo=new Pasajero($num_documento,$nombre,$apellido,$telefono);
-      if ($this->verificarEspacio()) {
+      
+      if ($this-> hayPasajesDisponible()) {
          $arre = $this->getArre_pasajero();
-         array_push($arre, $nuevo);
+         array_push($arre, $pasajero);
          $this->setArrePasajero($arre);
          $res = true;
       }
@@ -128,7 +147,14 @@ class Viaje
    public function __toString()
    {
       $cadena = "CODIGO DE VIAJE: " . ($this->getCodigo_viaje()) . " DESTINO: " . ($this->getDestino()) . " CANTIDAD MAXIMA: " . ($this->getCant_maxima()) . "\n";
-      $cadena .= "Responsable: ".$this->getObjResponsable()->__toString()."\n";
+      if($this->getEsIdaVuelta())
+      {
+        $cadena.="Ida y vuelta: ☑";   
+      }
+      else
+        $cadena.="Solo ida: ☑";
+
+      $cadena .= "\nResponsable: ".$this->getObjResponsable()->__toString()."\n";
       $cadena .= "Lista de pasajeros\n";
       foreach ($this->getArre_pasajero() as $pasajero) {
          $cadena .= $pasajero->__toString(). "\n";
@@ -136,4 +162,36 @@ class Viaje
       return $cadena;
    }
 
+   public function getEsIdaVuelta()
+   {
+      return $this->esIdaVuelta;
+   }
+   public function setEsIdaVuelta($esIdaVuelta)
+   {
+      $this->esIdaVuelta = $esIdaVuelta;
+   }
+ /**
+ *  Retorna el importe total a pagar.
+ * Double importeBase
+ * @return double
+ */
+   public function calcularImporte()
+   { 
+      $importeBase=$this->getImporte();
+      if($this->getEsIdaVuelta())
+      {
+         $importeBase=$importeBase+$importeBase*0.5;
+      }
+      
+     return $importeBase;
+   }
+   public function getImporte()
+   {
+      return $this->importe;
+   }
+
+   public function setImporte($importe)
+   {
+      $this->importe = $importe;
+   }
 }

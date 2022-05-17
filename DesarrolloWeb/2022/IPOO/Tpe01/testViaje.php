@@ -2,6 +2,8 @@
 /*TPE 01 
    Bruno Terrazas FAI-2585*/
 include_once 'Viaje.php';
+include 'ViajeAereo.php';
+include 'ViajeTerrestre.php';
 include_once 'Pasajero.php';
 include_once 'ResponsableV.php';
 
@@ -31,8 +33,12 @@ function iniciarTest()
                 $salir = true;
                 break;
             case 1:
-                $objViaje = cargarViaje();
-                $opcion = menuOpciones($objViaje);
+                $objViaje = cargarViajeAereo();
+                $opcion = menuOpciones($objViaje,"Aéreo");
+                break;
+            case 2:
+                $objViaje = cargarViajeTerrestre();
+                $opcion = menuOpciones($objViaje,"Terrestre");
                 break;
 
             default:
@@ -45,10 +51,11 @@ function iniciarTest()
 function imprimirMenu()
 {
     echo "**********************************************\n";
-    echo "(1) Cargar viaje\n";
+    echo "(1) Cargar viaje Aereo\n";
+    echo "(2) Cargar viaje Terrestre\n";
     echo "Presione (0) o cualquier letra para salir del programa\n";
 }
-function imprimirSubMenu()
+function imprimirSubMenu($tipo)
 {
     echo "*******************OPCIONES*******************\n";
     echo " (1) Editar datos del viaje\n";
@@ -56,6 +63,7 @@ function imprimirSubMenu()
     echo " (3) Editar pasajero\n";
     echo " (4) Modificar Responsable del viaje\n";
     echo " (5) Mostrar datos del viaje\n";
+    echo " (6) Vender pasaje $tipo\n";
     echo " Presione (0) o cualquier letra para salir del submenu\n";
 }
 /**
@@ -64,14 +72,15 @@ function imprimirSubMenu()
  * STRING $num_documento,$nombre,$apellido,$telefono
  * INT $opcion
  * @param Viaje $objViaje
+ * @param String $tipo
  * @return Int 
  */
-function menuOpciones(Viaje $objViaje)
+function menuOpciones(Viaje $objViaje,$tipo)
 {
 
     $salir = false;
     do {
-        imprimirSubMenu();
+        imprimirSubMenu($tipo);
 
         $opcion = validarNumero("una opcion");
         switch ($opcion) {
@@ -82,7 +91,7 @@ function menuOpciones(Viaje $objViaje)
                 modificarViaje($objViaje);
                 break;
             case 2:
-                if ($objViaje->verificarEspacio()) {
+                if ($objViaje-> hayPasajesDisponible()) {
 
                     echo "--------------------/Registrar Pasajero\--------------------\n";
 
@@ -115,7 +124,31 @@ function menuOpciones(Viaje $objViaje)
             case 5:
                 echo "*******************DATOS DEL VIAJE*******************\n" . $objViaje;
                 break;
+            case 6:
+                echo "*******************DATOS DEL VIAJE*******************\n" . $objViaje;
+                if($objViaje->hayPasajesDisponible())
+                {
+                    
+                    echo "--------------------/Vender pasaje $tipo - Registrar pasajero\--------------------\n";
 
+                    $num_documento = validarPasajero($objViaje);
+                    echo "Ingrese nombre\n";
+                    $nombre = trim(fgets(STDIN));
+                    echo "Ingrese apellido\n";
+                    $apellido = trim(fgets(STDIN));
+                    echo "Ingrese telefono\n";
+                    $telefono = trim(fgets(STDIN));
+                     
+                    $pasajero =new Pasajero($num_documento,$nombre,$apellido,$telefono);
+                    
+                    $importe=$objViaje->venderPasaje($pasajero);
+                    if($importe!="")
+                        echo "Importe total:".$importe."\n";
+                    else 
+                       echo "No se pudo realizar la venta\n";
+                    
+                }
+                    break;
 
             default:
                 echo "¡Opcion Incorrecta!, de nuevo\n";
@@ -134,7 +167,40 @@ function menuOpciones(Viaje $objViaje)
  * ARRAY $listapasajero
  * @return Viaje
  */
-function cargarViaje()
+function cargarViajeAereo()
+{
+    $unResponsableV = new ResponsableV(1, 234234, "Viviana", "Jimenez");
+    $listapasajero = array();
+    $listapasajero[0] = new Pasajero("77723222", "Carlos", "Perez", "2991542323");
+    $listapasajero[1] = new Pasajero("88823222", "Esteban", "Rosales", "292542323");
+    $listapasajero[2] = new Pasajero("1323222", "Pablo", "Perez", "2995532322");
+    $listapasajero[3] = new Pasajero("6323222", "Carlos", "Nuñez", "0115423444");
+    $listapasajero[4] = new Pasajero("7323222", "Pedro", "Solari", "2903333323");
+    $listapasajero[5] = new Pasajero("3333222", "Raul", "Gonzalez", "297772323");
+    $listapasajero[6] = new Pasajero("2443222", "Maria", "Rojas", "2995423881");
+    $listapasajero[7] = new Pasajero("6766622", "Juana", "Lozada", "0115314299");
+    $codigo_viaje = "v01";
+    $destino = "Bariloche";
+    $cant_maxima = 10;
+    $esIdaVuelta=true;
+    $importe=10000;
+    $num_vuelo=01;
+    $nombre_aero="Aerolineas Argentinas";
+    $esPrimeraClase=true;
+    //si es sin escalas se asigna 0
+    $cantidad_escalas=0;
+    $objViaje = new ViajeAereo($codigo_viaje, $destino, $cant_maxima, $listapasajero,$unResponsableV,$esIdaVuelta,$importe,$num_vuelo,$nombre_aero,$esPrimeraClase,$cantidad_escalas);
+    return $objViaje;
+}
+/**
+ * Crea un viaje y carga sus datos
+ * INT $cant_maxima
+ * STRING $codigo_viaje
+ * STRING $destino
+ * ARRAY $listapasajero
+ * @return Viaje
+ */
+function cargarViajeTerrestre()
 {
     $unResponsableV = new ResponsableV(1, 234234, "Julio", "Cruz");
     $listapasajero = array();
@@ -149,10 +215,15 @@ function cargarViaje()
     $codigo_viaje = "v01";
     $destino = "Bariloche";
     $cant_maxima = 10;
-    $objViaje = new Viaje($codigo_viaje, $destino, $cant_maxima, $listapasajero,$unResponsableV);
+    $esIdaVuelta=true;
+    $importe=10000;
+    //tipo de asiento debe ser: Cama o Semicama
+    $tipo_asiento="Cama";
+    $objViaje = new ViajeTerrestre($codigo_viaje, $destino, $cant_maxima, $listapasajero,$unResponsableV,$esIdaVuelta,$importe,$tipo_asiento);
 
     return $objViaje;
 }
+
 /**
  * Permite modificar al responsable del viaje
  * INT $num_responsable,$numlicencia
@@ -208,10 +279,11 @@ function modificarViaje(Viaje $objViaje)
 function registrarPasajero(Viaje $objViaje, $num_documento, $nombre, $apellido, $telefono)
 {
     $cantPasajeros = count($objViaje->getArre_pasajero());
-    $res = false;
+    $res=false;
     if (($objViaje->buscarPasajero($num_documento) == null)) {
         if ($cantPasajeros < $objViaje->getCant_maxima()) {
-            $res = $objViaje->agregarPasajero($nombre, $apellido, $num_documento, $telefono);
+            $nuevo=new Pasajero($num_documento,$nombre,$apellido,$telefono);
+            $res=$objViaje->agregarPasajero($nuevo);
         }
     }
     return $res;
@@ -288,3 +360,4 @@ function validarNumero($texto)
     }
     return $valor;
 }
+
