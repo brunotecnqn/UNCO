@@ -12,7 +12,7 @@ class BaseDatos {
     private $ERROR;
     /**
      * Constructor de la clase que inicia ls variables instancias de la clase
-     * vinculadas a la coneccion con el Servidor de BD
+     * vinculadas a la conexion con el Servidor de BD
      */
     public function __construct(){
         $this->HOSTNAME = "127.0.0.1";
